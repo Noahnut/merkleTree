@@ -5,7 +5,7 @@ In this implement use the sha256 as the hash function and provide add new data b
 
 ## Install 
 ```
-go get github.com/noahnut/merkletree
+go get github.com/Noahnut/merkletree
 ```
 
 
