@@ -10,5 +10,32 @@ go get github.com/Noahnut/merkletree
 
 
 ## Example Usage
-```
+```go
+package main
+
+import (
+	"fmt"
+
+	"github.com/Noahnut/merkletree"
+)
+
+func main() {
+	m := merkletree.CreateMerkleTree()
+	a := "testString"
+	b := "testStringTwo"
+	c := "testStringThree"
+	d := "testStringFour"
+	e := "testStringFive"
+
+	m.AddNewBlock([]byte(a))
+	m.AddNewBlock([]byte(b))
+	m.AddNewBlock([]byte(c))
+	m.AddNewBlock([]byte(d))
+	m.AddNewBlock([]byte(e))
+
+	result := m.ContextValidator([]byte(e))
+
+	fmt.Println(result)
+
+}
 ```
