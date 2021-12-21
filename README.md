@@ -27,15 +27,20 @@ func main() {
 	d := "testStringFour"
 	e := "testStringFive"
 
+	// Add the new data to the tree
 	m.AddNewBlock([]byte(a))
 	m.AddNewBlock([]byte(b))
 	m.AddNewBlock([]byte(c))
 	m.AddNewBlock([]byte(d))
 	m.AddNewBlock([]byte(e))
 
+	// Verify the data is exist in the tree or not
 	result := m.ContextValidator([]byte(e))
 
-	fmt.Println(result)
+	// Get the root hash value 
+	rootHash := m.GetRootHash()
 
+	// Check tree from top to down hash value is correct
+	result := CheckTreeCorrect
 }
 ```
