@@ -41,6 +41,6 @@ func main() {
 	rootHash := m.GetRootHash()
 
 	// Check tree from top to down hash value is correct
-	result := CheckTreeCorrect
+	result := m.CheckTreeCorrect()
 }
 ```
