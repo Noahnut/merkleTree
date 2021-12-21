@@ -55,8 +55,58 @@ func (m *MerkleTree) AddNewBlock(context []byte) {
 	m.Leafs.Store(hex.EncodeToString(n.HashValue), &n)
 }
 
+func (m *MerkleTree) GetRootHash() []byte {
+	return m.root.HashValue
+}
+
+func (m *MerkleTree) CheckTreeCorrect() bool {
+	return m.checkParentHashValue(m.root)
+}
+
+// Check the context exist and legal in the tree
+// make sure all the hash from leaf to root is correct
+func (m *MerkleTree) ContextValidator(context []byte) bool {
+
+	ct, err := m.calculateHash(context)
+
+	if err != nil {
+		fmt.Println(err.Error())
+		return false
+	}
+
+	Icn, exist := m.Leafs.Load(hex.EncodeToString(ct))
+
+	if !exist {
+		fmt.Println("Context not exist")
+		return false
+	}
+
+	cn := Icn.(*node)
+
+	cnParent := cn.Parent
+
+	for cnParent != nil {
+
+		cpH, err := m.getParentHashValue(cnParent)
+
+		if err != nil {
+			fmt.Println(err.Error())
+			return false
+		}
+
+		if !bytes.Equal(cpH, cnParent.HashValue) {
+			fmt.Println("Hash Function is not correct", hex.EncodeToString(cpH), hex.EncodeToString(cnParent.HashValue))
+			return false
+		}
+
+		cnParent = cnParent.Parent
+	}
+
+	return true
+}
+
 // calculate Parent Hash Value from child
-func (m *MerkleTree) calculateParentHash(n *node) {
+func (m *MerkleTree) calculateParentHashPath(n *node) {
 	iter := n.Parent
 
 	for {
@@ -64,17 +114,7 @@ func (m *MerkleTree) calculateParentHash(n *node) {
 			return
 		}
 
-		lh, rh := make([]byte, 0), make([]byte, 0)
-
-		if iter.Left != nil {
-			lh = iter.Left.HashValue
-		}
-
-		if iter.Right != nil {
-			rh = iter.Right.HashValue
-		}
-
-		HashValue, err := m.calculateHash(append(lh, rh...))
+		HashValue, err := m.getParentHashValue(iter)
 
 		if err != nil {
 			log.Println("Hash write Failure: ", err.Error())
@@ -103,7 +143,7 @@ func (m *MerkleTree) createNewTree(n *node) {
 	m.root = rootNode
 	m.depth++
 	m.remainLeft = (1 << m.depth) - 1
-	m.calculateParentHash(n)
+	m.calculateParentHashPath(n)
 }
 
 // add the node to the tree
@@ -152,59 +192,51 @@ func (m *MerkleTree) addNodeToTree(n *node) {
 			m.depth++
 			m.remainLeft = 1 << m.depth
 		}
-		m.calculateParentHash(n)
+		m.calculateParentHashPath(n)
 	}
 }
 
-// Check the context exist and legal in the tree
-// make sure all the hash from leaf to root is correct
-func (m *MerkleTree) ContextValidator(context []byte) bool {
+func (m *MerkleTree) checkParentHashValue(p *node) bool {
 
-	ct, err := m.calculateHash(context)
+	if p == nil || p.Isleaf {
+		return true
+	}
+
+	cpH, err := m.getParentHashValue(p)
+
+	if err != nil {
+		return false
+	}
+
+	if !bytes.Equal(cpH, p.HashValue) {
+		fmt.Println("Hash Function is not correct", hex.EncodeToString(cpH), hex.EncodeToString(p.HashValue))
+		return false
+	}
+
+	m.checkParentHashValue(p.Left)
+	m.checkParentHashValue(p.Right)
+	return true
+}
+
+func (m *MerkleTree) getParentHashValue(p *node) ([]byte, error) {
+	lh, rh := make([]byte, 0), make([]byte, 0)
+
+	if p.Left != nil {
+		lh = p.Left.HashValue
+	}
+
+	if p.Right != nil {
+		rh = p.Right.HashValue
+	}
+
+	cpH, err := m.calculateHash(append(lh, rh...))
 
 	if err != nil {
 		fmt.Println(err.Error())
-		return false
+		return nil, err
 	}
 
-	Icn, exist := m.Leafs.Load(hex.EncodeToString(ct))
-
-	if !exist {
-		fmt.Println("Context not exist")
-		return false
-	}
-
-	cn := Icn.(*node)
-
-	cnParent := cn.Parent
-
-	for cnParent != nil {
-		lh, rh := make([]byte, 0), make([]byte, 0)
-
-		if cn.Parent.Left != nil {
-			lh = cnParent.Left.HashValue
-		}
-
-		if cn.Parent.Right != nil {
-			rh = cnParent.Right.HashValue
-		}
-
-		cpH, err := m.calculateHash(append(lh, rh...))
-
-		if err != nil {
-			fmt.Println(err.Error())
-			return false
-		}
-
-		if !bytes.Equal(cpH, cnParent.HashValue) {
-			fmt.Println("Hash Function is not correct", hex.EncodeToString(cpH), hex.EncodeToString(cnParent.HashValue))
-			return false
-		}
-
-		cnParent = cnParent.Parent
-	}
-
-	return true
+	return cpH, nil
 }
 
 func (m *MerkleTree) calculateHash(context []byte) ([]byte, error) {
@@ -241,6 +273,11 @@ func (m *MerkleTree) PrintCurrTree() {
 
 		queue = queue[1:]
 	}
+}
+
+func (m *MerkleTree) checkLeafExist(hashString string) bool {
+	_, ok := m.Leafs.Load(hashString)
+	return ok
 }
 
 //helper function
