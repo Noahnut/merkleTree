@@ -1,8 +1,8 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/Noahnut/merkletree.svg)](https://pkg.go.dev/github.com/Noahnut/merkletree)
 
 # MerkleTree Golang
-MerkleTree is a hash tree which hash from the leaf to the root, each hash value have the relation so can easy to verify the data from different source.
-In this implement use the sha256 as the hash function and provide add new data block, verify data and get the root hash value feature.
+MerkleTree is a hash tree which hash the node context from the leaf to the root. all the parent hash value has relation with its child node, this data struct can use for easily verify data set in the O(logN) time complexity.
+In this implement have the add new leaf, get the root hash value, check the context is correct feature.
 
 
 ## Install 

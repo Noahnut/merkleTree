@@ -55,10 +55,12 @@ func (m *MerkleTree) AddNewBlock(context []byte) {
 	m.Leafs.Store(hex.EncodeToString(n.HashValue), &n)
 }
 
+// Get the Tree root hash value
 func (m *MerkleTree) GetRootHash() []byte {
 	return m.root.HashValue
 }
 
+// Check Tree all the hash value is follow the Merkle Tree Properity
 func (m *MerkleTree) CheckTreeCorrect() bool {
 	return m.checkParentHashValue(m.root)
 }
