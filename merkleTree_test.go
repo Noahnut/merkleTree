@@ -86,6 +86,61 @@ func TestCreateNewTree(t *testing.T) {
 	}
 }
 
+func TestOddLeaf(t *testing.T) {
+	mt := CreateMerkleTree()
+
+	testStringOne := "testString"
+	testStringOneExpectSHA256 := "4acf0b39d9c4766709a3689f553ac01ab550545ffa4544dfc0b2cea82fba02a3"
+	testStringTwo := "testStringTwo"
+	StringTwoExpectSHA256 := "a0f5924b97a3957686098083f696f24917955b844813f98563bb432f74869c25"
+	testStringThree := "testStringThree"
+	testStringThreeExpectSHA256 := "0fec6c35e72054934c9ed3c65cabcd1ac0fe004ded1e84a0548eef3d6a4fc53f"
+
+	mt.AddNewBlock([]byte(testStringOne))
+	exist := mt.checkLeafExist(testStringOneExpectSHA256)
+	if !exist {
+		t.Error("SHA256 Fail")
+
+	}
+
+	mt.AddNewBlock([]byte(testStringTwo))
+	exist = mt.checkLeafExist(StringTwoExpectSHA256)
+	if !exist {
+		t.Error("SHA256 Fail")
+
+	}
+
+	mt.AddNewBlock([]byte(testStringThree))
+	exist = mt.checkLeafExist(testStringThreeExpectSHA256)
+	if !exist {
+		t.Error("SHA256 Fail")
+	}
+
+	result := mt.ContextValidator([]byte(testStringOne))
+
+	if !result {
+		t.Error("Validator Fail")
+	}
+
+	result = mt.ContextValidator([]byte(testStringTwo))
+
+	if !result {
+		t.Error("Validator Fail")
+	}
+
+	result = mt.ContextValidator([]byte(testStringThree))
+
+	if !result {
+		t.Error("Validator Fail")
+	}
+
+	result = mt.CheckTreeCorrect()
+
+	if !result {
+		t.Error("Validator Fail")
+	}
+}
+
 func TestManyLeaf(t *testing.T) {
 	mt := CreateMerkleTree()
 
