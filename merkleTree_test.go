@@ -3,6 +3,7 @@ package merkletree
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
 	"strconv"
 	"testing"
 )
@@ -236,5 +237,107 @@ func TestFindTreeDifferentContext_OneDifferent(t *testing.T) {
 
 	if string(diffContext[0]) != testStringSix {
 		t.Error("Wrong different context")
+	}
+}
+
+func TestFindTreeDifferentContext_AllDifferent(t *testing.T) {
+	firstTree := CreateMerkleTree()
+
+	testStringOne := "testString"
+	testStringTwo := "testStringTwo"
+	testStringThree := "testStringThree"
+	testStringFour := "testStringFour"
+	testStringFive := "testStringFive"
+	testStringSix := "testStringSix"
+
+	firstTree.AddNewBlock([]byte(testStringOne))
+	firstTree.AddNewBlock([]byte(testStringTwo))
+	firstTree.AddNewBlock([]byte(testStringThree))
+	firstTree.AddNewBlock([]byte(testStringFour))
+	firstTree.AddNewBlock([]byte(testStringFive))
+	firstTree.AddNewBlock([]byte(testStringSix))
+
+	SecondTree := CreateMerkleTree()
+
+	diffTestStringArray := []string{
+		"testString_diff",
+		"testStringFive_diff",
+		"testStringThree_diff",
+		"testStringSix_diff",
+		"testStringTwo_diff",
+		"testStringFour_diff",
+	}
+
+	SecondTree.AddNewBlock([]byte(diffTestStringArray[0]))
+	SecondTree.AddNewBlock([]byte(diffTestStringArray[4]))
+	SecondTree.AddNewBlock([]byte(diffTestStringArray[2]))
+	SecondTree.AddNewBlock([]byte(diffTestStringArray[5]))
+	SecondTree.AddNewBlock([]byte(diffTestStringArray[1]))
+	SecondTree.AddNewBlock([]byte(diffTestStringArray[3]))
+
+	diffContext := firstTree.GetDifferentContextFromTree(SecondTree)
+
+	if len(diffContext) != 6 {
+		t.Error("Wrong different context length")
+	}
+
+	for i := range diffContext {
+		if string(diffContext[i]) != diffTestStringArray[i] {
+			t.Error("Wrong different context")
+		}
+	}
+}
+
+func TestFindTreeDifferentContext_ManyDifferent(t *testing.T) {
+	firstTree := CreateMerkleTree()
+
+	testStringOne := "testString"
+	testStringTwo := "testStringTwo"
+	testStringThree := "testStringThree"
+	testStringFour := "testStringFour"
+	testStringFive := "testStringFive"
+	testStringSix := "testStringSix"
+
+	firstTree.AddNewBlock([]byte(testStringOne))
+	firstTree.AddNewBlock([]byte(testStringTwo))
+	firstTree.AddNewBlock([]byte(testStringThree))
+	firstTree.AddNewBlock([]byte(testStringFour))
+	firstTree.AddNewBlock([]byte(testStringFive))
+	firstTree.AddNewBlock([]byte(testStringSix))
+
+	SecondTree := CreateMerkleTree()
+
+	TestStringArray := []string{
+		"testString",
+		"testStringFive_diff",
+		"testStringThree_diff",
+		"testStringSix",
+		"testStringTwo_diff",
+		"testStringFour",
+	}
+
+	SecondTree.AddNewBlock([]byte(TestStringArray[0]))
+	SecondTree.AddNewBlock([]byte(TestStringArray[4]))
+	SecondTree.AddNewBlock([]byte(TestStringArray[2]))
+	SecondTree.AddNewBlock([]byte(TestStringArray[5]))
+	SecondTree.AddNewBlock([]byte(TestStringArray[1]))
+	SecondTree.AddNewBlock([]byte(TestStringArray[3]))
+
+	diffContext := firstTree.GetDifferentContextFromTree(SecondTree)
+
+	if len(diffContext) != 3 {
+		t.Error("Wrong different context length")
+	}
+
+	diffStringArray := []string{
+		"testStringFive_diff",
+		"testStringThree_diff",
+		"testStringTwo_diff",
+	}
+
+	for i := range diffContext {
+		if string(diffContext[i]) != diffStringArray[i] {
+			fmt.Println("Wrong different context", string(diffContext[i]))
+		}
 	}
 }

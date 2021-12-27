@@ -66,11 +66,11 @@ func (m *MerkleTree) getDifferentContext(context *[][]byte, cNode *node, tNode *
 		return
 	}
 
-	if !bytes.Equal(cNode.Left.HashValue, tNode.Left.HashValue) {
+	if cNode.Left != nil && tNode.Left != nil && !bytes.Equal(cNode.Left.HashValue, tNode.Left.HashValue) {
 		m.getDifferentContext(context, cNode.Left, tNode.Left)
 	}
 
-	if !bytes.Equal(cNode.Right.HashValue, tNode.Right.HashValue) {
+	if cNode.Right != nil && tNode.Right != nil && !bytes.Equal(cNode.Right.HashValue, tNode.Right.HashValue) {
 		m.getDifferentContext(context, cNode.Right, tNode.Right)
 	}
 }

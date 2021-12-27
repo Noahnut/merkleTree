@@ -21,3 +21,18 @@ func BenchmarkSimpleTree(b *testing.B) {
 		}
 	}
 }
+
+func BenchmarkCompareDifferTree(b *testing.B) {
+	first := CreateMerkleTree()
+	Second := CreateMerkleTree()
+
+	for i := 0; i < b.N; i++ {
+		first.AddNewBlock([]byte(strconv.Itoa(i)))
+	}
+
+	for i := b.N; i >= 0; i-- {
+		Second.AddNewBlock([]byte(strconv.Itoa(i)))
+	}
+
+	first.GetDifferentContextFromTree(Second)
+}
