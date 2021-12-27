@@ -194,3 +194,47 @@ func TestManyLeaf(t *testing.T) {
 		t.Error("Validator Fail")
 	}
 }
+
+func TestFindTreeDifferentContext_OneDifferent(t *testing.T) {
+	firstTree := CreateMerkleTree()
+
+	testStringOne := "testString"
+	testStringTwo := "testStringTwo"
+	testStringThree := "testStringThree"
+	testStringFour := "testStringFour"
+	testStringFive := "testStringFive"
+	testStringSix := "testStringSix"
+
+	firstTree.AddNewBlock([]byte(testStringOne))
+	firstTree.AddNewBlock([]byte(testStringTwo))
+	firstTree.AddNewBlock([]byte(testStringThree))
+	firstTree.AddNewBlock([]byte(testStringFour))
+	firstTree.AddNewBlock([]byte(testStringFive))
+	firstTree.AddNewBlock([]byte(testStringSix))
+
+	SecondTree := CreateMerkleTree()
+
+	testStringOne = "testString"
+	testStringTwo = "testStringTwo"
+	testStringThree = "testStringThree"
+	testStringFour = "testStringFour"
+	testStringFive = "testStringFive"
+	testStringSix = "testStringSix_diff"
+
+	SecondTree.AddNewBlock([]byte(testStringOne))
+	SecondTree.AddNewBlock([]byte(testStringTwo))
+	SecondTree.AddNewBlock([]byte(testStringThree))
+	SecondTree.AddNewBlock([]byte(testStringFour))
+	SecondTree.AddNewBlock([]byte(testStringFive))
+	SecondTree.AddNewBlock([]byte(testStringSix))
+
+	diffContext := firstTree.GetDifferentContextFromTree(SecondTree)
+
+	if len(diffContext) != 1 {
+		t.Error("Wrong different context length")
+	}
+
+	if string(diffContext[0]) != testStringSix {
+		t.Error("Wrong different context")
+	}
+}

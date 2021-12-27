@@ -55,6 +55,32 @@ func (m *MerkleTree) AddNewBlock(context []byte) {
 	m.Leafs.Store(hex.EncodeToString(n.HashValue), &n)
 }
 
+func (m *MerkleTree) getDifferentContext(context *[][]byte, cNode *node, tNode *node) {
+
+	if cNode.Isleaf {
+		*context = append(*context, cNode.Context)
+		return
+	}
+
+	if bytes.Equal(cNode.HashValue, tNode.HashValue) {
+		return
+	}
+
+	if !bytes.Equal(cNode.Left.HashValue, tNode.Left.HashValue) {
+		m.getDifferentContext(context, cNode.Left, tNode.Left)
+	}
+
+	if !bytes.Equal(cNode.Right.HashValue, tNode.Right.HashValue) {
+		m.getDifferentContext(context, cNode.Right, tNode.Right)
+	}
+}
+
+func (m *MerkleTree) GetDifferentContextFromTree(compareTree *MerkleTree) [][]byte {
+	differContext := make([][]byte, 0)
+	m.getDifferentContext(&differContext, compareTree.root, m.root)
+	return differContext
+}
+
 // Get the Tree root hash value
 func (m *MerkleTree) GetRootHash() []byte {
 	return m.root.HashValue
